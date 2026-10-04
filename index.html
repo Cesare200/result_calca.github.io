@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src https://stovotoinformadodev.blob.core.windows.net data:; connect-src https://*.firebaseio.com https://*.firebasedatabase.app; base-uri 'none'; form-action 'none'">
 <title>Resultados Provincia de Calca</title>
-<style nonce="__NONCE__">
+<style>
 :root{--bg:#f4f5f7;--card:#fff;--tx:#1b1f27;--mu:#667085;--bd:#e3e6eb;--ac:#1d4ed8;--tr:#eef0f4}
 @media(prefers-color-scheme:dark){:root{--bg:#12151b;--card:#1b2029;--tx:#eef0f4;--mu:#9aa3b2;--bd:#2c3340;--ac:#6d93ff;--tr:#262c38}}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--tx)}
@@ -18,8 +19,7 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}button.d{color:#
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
 .stat{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px}
 .stat span{color:var(--mu);font-size:.78rem}.stat b{display:block;font-size:1.4rem;margin-top:2px}
-.bars{display:flex;flex-direction:column}
-.row{display:flex;align-items:center;gap:10px;padding:6px 0}
+.bars{display:flex;flex-direction:column}.row{display:flex;align-items:center;gap:10px;padding:6px 0}
 .logo{width:42px;height:42px;border-radius:8px;object-fit:contain;background:#fff;border:1px solid var(--bd);flex:none}
 .fb{width:42px;height:42px;border-radius:8px;flex:none;display:none;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem}
 .nm{width:150px;font-size:.82rem;flex:none;line-height:1.15}
@@ -32,11 +32,9 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}button.d{color:#
 #tip b{display:block;margin-bottom:3px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--bd)}th:first-child,td:first-child{text-align:left}
 .live{font-size:.75rem;color:var(--mu)}.live i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;margin-right:5px;animation:pl 1.5s infinite}
-.live.off i{background:#dc2626;animation:none}
-@keyframes pl{50%{opacity:.3}}
+.live.off i{background:#dc2626;animation:none}@keyframes pl{50%{opacity:.3}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.fld{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:10px;padding:8px}
-.fld .nm{width:auto;flex:1}
+.fld{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:10px;padding:8px}.fld .nm{width:auto;flex:1}
 input{font:inherit;padding:7px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
 .fld input{width:100px;text-align:right}
 .login{max-width:320px;margin:50px auto;display:flex;flex-direction:column;gap:10px}.login input,.pw input{width:100%}
@@ -52,7 +50,13 @@ input{font:inherit;padding:7px;border:1px solid var(--bd);border-radius:8px;back
 </header>
 <main id="app"></main>
 <div id="tip"></div>
-<script nonce="__NONCE__">
+<script>
+/* ====== CONFIGURA ESTO (ver pasos) ====== */
+const CFG={
+  passHash:'',   // hash de tu contraseña: déjalo vacío, abre la página > Admin y sigue las instrucciones
+  db:'https://resultcalca-default-rtdb.firebaseio.com'   // sin "/" al final
+};
+/* ======================================== */
 const DIST=['Calca (capital)','Coya','Lamay','Lares','Pisac','San Salvador','Taray','Yanatile'];
 const B='https://stovotoinformadodev.blob.core.windows.net/contenedor-2/';
 const P=[['Acción Popular',4,'#c0392b'],['Ahora Nación (AN)',2980,'#e67e22'],['Alianza Electoral Venceremos',3028,'#8e44ad'],
@@ -60,122 +64,123 @@ const P=[['Acción Popular',4,'#c0392b'],['Ahora Nación (AN)',2980,'#e67e22'],[
  ['Partido Demócrata Verde',2895,'#2ecc71'],['Perú Primero',2925,'#d35400'],['PRIN',2921,'#34495e'],['Progresemos',2967,'#f39c12']
 ].map((p,i)=>({id:i,name:p[0],logo:B+p[1]+'.png',color:p[2]}));
 
-let data={},ver=0,view='public',filter='all',authed=false,csrf='',adminDist=0,pending=0,online=true;
-const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString('es-PE'),v=(d,p)=>(data[d]&&data[d][p])|0;
-const tot=(p,f)=>f==='all'?DIST.reduce((s,d)=>s+v(d,p),0):v(f,p);
+let data={},view='public',filter='all',adminDist=0,online=false;
+const isAdm=()=>sessionStorage.getItem('adm')==='1';
+const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString('es-PE');
+const v=(i,p)=>((data['d'+i]||{})['p'+p])|0;                       // i = índice de distrito
+const tot=(p,f)=>f==='all'?DIST.reduce((s,_,i)=>s+v(i,p),0):v(f,p);   // f = 'all' o índice
 const app=$('app'),nav=$('nav'),tip=$('tip');
 
-async function api(m,u,b){
-  const r=await fetch(u,{method:m,cache:'no-store',headers:{'Content-Type':'application/json','X-CSRF':csrf},body:b?JSON.stringify(b):undefined});
-  const j=await r.json().catch(()=>({}));
-  if(!r.ok)throw Object.assign(new Error(j.error||'Error'),{status:r.status});
-  return j;
+/* ---------- Firebase por REST ---------- */
+const SALT='calca-2026';
+async function sha(pw){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(SALT+pw));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function write(path,obj){
+  const r=await fetch(`${CFG.db}/${path}.json`,{method:'PUT',body:JSON.stringify(obj)});
+  if(!r.ok)throw new Error('No se pudo guardar (revisa las reglas de la base de datos)');
 }
+function logout(){sessionStorage.removeItem('adm')}
+
+/* ---------- Tiempo real (SSE): se actualiza solo ---------- */
+function setPath(path,val,merge){
+  const k=path.split('/').filter(Boolean);
+  if(!k.length)data=merge?{...data,...val}:(val||{});
+  else{let o=data;for(let i=0;i<k.length-1;i++)o=o[k[i]]=(o[k[i]]&&typeof o[k[i]]==='object')?o[k[i]]:{};
+    const last=k[k.length-1];if(merge)o[last]={...o[last],...val};else if(val===null)delete o[last];else o[last]=val}
+  if(view==='public')updatePublic();
+}
+function stream(){
+  const es=new EventSource(CFG.db+'/votes.json');
+  es.addEventListener('put',e=>{const m=JSON.parse(e.data);setPath(m.path,m.data,false)});
+  es.addEventListener('patch',e=>{const m=JSON.parse(e.data);setPath(m.path,m.data,true)});
+  es.onopen=()=>{online=true;setLive()};es.onerror=()=>{online=false;setLive()};
+}
+
+/* ---------- UI ---------- */
 document.addEventListener('error',e=>{const t=e.target;if(t.classList&&t.classList.contains('logo')){t.style.display='none';t.nextElementSibling.style.display='flex'}},true);
 const logoHTML=p=>`<img class="logo" src="${p.logo}" alt="" referrerpolicy="no-referrer"><div class="fb" style="background:${p.color}">${p.name.split(' ').filter(w=>w.length>2).map(w=>w[0]).join('').slice(0,3).toUpperCase()}</div>`;
-
+function setLive(){const l=$('live');l.className='live'+(online?'':' off');l.innerHTML=online?'<i></i>En vivo':'<i></i>Sin conexión'}
 function render(){
   nav.textContent=view==='public'?'Admin':'← Ver resultados';
-  if(view==='public')renderPublic();else if(!authed)renderLogin();else renderAdmin();
+  if(view==='public')renderPublic();else if(!isAdm())renderLogin();else renderAdmin();
   setLive();
 }
-function setLive(){const l=$('live');l.className='live'+(online?'':' off');l.innerHTML=online?'<i></i>En vivo':'<i></i>Sin conexión'}
 nav.onclick=()=>{view=view==='public'?'admin':'public';render()};
 
-/* ---------- PÚBLICO ---------- */
 function renderPublic(){
-  app.innerHTML=`<div class="card"><div class="chips" id="chips">${['all',...DIST].map(d=>`<button data-d="${d}">${d==='all'?'General (suma)':d}</button>`).join('')}</div></div>
+  app.innerHTML=`<div class="card"><div class="chips" id="chips">${['all',...DIST].map((d,i)=>`<button data-d="${i===0?'all':i-1}">${i===0?'General (suma)':d}</button>`).join('')}</div></div>
   <div class="stats" id="stats"></div>
   <div class="card"><h3 style="margin:0 0 10px" id="ttl"></h3><div class="bars">${P.map(p=>`<div class="row" data-id="${p.id}">${logoHTML(p)}<div class="nm">${p.name}</div><div class="tr"><div class="fill" style="background:${p.color}"></div></div><div class="vl"><b>0</b><span>0%</span></div></div>`).join('')}</div></div>
   <div class="card" id="tbl" style="overflow-x:auto"></div>`;
-  $('chips').onclick=e=>{const d=e.target.dataset.d;if(d){filter=d;updatePublic()}};
+  $('chips').onclick=e=>{const d=e.target.dataset.d;if(d!==undefined){filter=d==='all'?'all':+d;updatePublic()}};
   app.querySelectorAll('.row').forEach(r=>{r.onmousemove=e=>showTip(e,+r.dataset.id);r.onmouseleave=()=>tip.style.display='none'});
   updatePublic();
 }
 function showTip(e,id){
   let h=`<b>${P[id].name}</b>${fmt(tot(id,filter))} votos`;
-  if(filter==='all')h+='<br>'+DIST.map(d=>`${d}: ${fmt(v(d,id))}`).join('<br>');
+  if(filter==='all')h+='<br>'+DIST.map((d,i)=>`${d}: ${fmt(v(i,id))}`).join('<br>');
   tip.innerHTML=h;tip.style.display='block';tip.style.left=Math.min(e.clientX+14,innerWidth-240)+'px';tip.style.top=(e.clientY+14)+'px';
 }
 function updatePublic(){
   if(!$('chips'))return;
-  document.querySelectorAll('#chips button').forEach(b=>b.classList.toggle('on',b.dataset.d===filter));
+  document.querySelectorAll('#chips button').forEach(b=>b.classList.toggle('on',b.dataset.d===String(filter)));
   const t=P.map(p=>tot(p.id,filter)),sum=t.reduce((a,b)=>a+b,0),max=Math.max(...t,1);
-  const order=P.map(p=>p.id).sort((a,b)=>t[b]-t[a]);
+  const order=P.map(p=>p.id).sort((a,b)=>t[b]-t[a]),name=filter==='all'?'Provincia de Calca':DIST[filter];
   app.querySelectorAll('.row').forEach(r=>{
     const id=+r.dataset.id;r.style.order=order.indexOf(id);
     r.querySelector('.fill').style.width=(t[id]/max*100)+'%';
     r.querySelector('.vl').innerHTML=`<b>${fmt(t[id])}</b><span>${sum?(t[id]/sum*100).toFixed(1):'0.0'}%</span>`;
   });
-  $('ttl').textContent=filter==='all'?'Total provincial (suma de 8 distritos)':filter;
-  $('stats').innerHTML=`<div class="stat"><span>Votos totales</span><b>${fmt(sum)}</b></div><div class="stat"><span>Partido líder</span><b style="font-size:1rem;margin-top:6px">${sum?P[order[0]].name:'—'}</b></div><div class="stat"><span>Ámbito</span><b style="font-size:1rem;margin-top:6px">${filter==='all'?'Provincia de Calca':filter}</b></div>`;
-  const dt=DIST.map(d=>P.reduce((s,p)=>s+v(d,p.id),0));
+  $('ttl').textContent=filter==='all'?'Total provincial (suma de 8 distritos)':name;
+  $('stats').innerHTML=`<div class="stat"><span>Votos totales</span><b>${fmt(sum)}</b></div><div class="stat"><span>Partido líder</span><b style="font-size:1rem;margin-top:6px">${sum?P[order[0]].name:'—'}</b></div><div class="stat"><span>Ámbito</span><b style="font-size:1rem;margin-top:6px">${name}</b></div>`;
+  const dt=DIST.map((_,i)=>P.reduce((s,p)=>s+v(i,p.id),0));
   $('tbl').innerHTML=`<table><tr><th>Distrito</th><th>Votos</th><th>Primer lugar</th></tr>`+DIST.map((d,i)=>{
-    const best=[...P].sort((a,b)=>v(d,b.id)-v(d,a.id))[0];return `<tr><td>${d}</td><td>${fmt(dt[i])}</td><td>${dt[i]?best.name:'—'}</td></tr>`}).join('')+`<tr><th>Total</th><th>${fmt(dt.reduce((a,b)=>a+b,0))}</th><th></th></tr></table>`;
+    const best=[...P].sort((a,b)=>v(i,b.id)-v(i,a.id))[0];return `<tr><td>${d}</td><td>${fmt(dt[i])}</td><td>${dt[i]?best.name:'—'}</td></tr>`}).join('')+`<tr><th>Total</th><th>${fmt(dt.reduce((a,b)=>a+b,0))}</th><th></th></tr></table>`;
 }
 
-/* ---------- LOGIN / ADMIN ---------- */
+/* ---------- Login / Admin ---------- */
 function renderLogin(){
-  app.innerHTML=`<div class="card login"><h3 style="margin:0">Acceso administrador</h3>
-  <input id="u" placeholder="Usuario" autocomplete="username"><input id="pw" type="password" placeholder="Contraseña" autocomplete="current-password">
-  <div class="msg" id="err"></div><button class="p" id="go">Ingresar</button></div>`;
+  const setup=!CFG.passHash;
+  app.innerHTML=`<div class="card login"><h3 style="margin:0">${setup?'Crear contraseña':'Acceso administrador'}</h3>
+  <input id="pw" type="password" placeholder="Contraseña" autocomplete="current-password">
+  <div class="msg" id="err"></div><button class="p" id="go">${setup?'Generar hash':'Ingresar'}</button></div>`;
+  let fails=0,lock=0;
   const go=async()=>{
-    $('go').disabled=true;
-    try{const r=await api('POST','/api/login',{user:$('u').value,pass:$('pw').value});csrf=r.csrf;authed=true;render()}
-    catch(e){$('err').textContent=e.message;$('go').disabled=false;$('pw').value=''}
+    const h=await sha($('pw').value);
+    if(setup){$('err').className='msg ok';$('err').innerHTML='Copia este valor en <b>passHash</b> dentro de index.html:<br><code style="word-break:break-all">'+h+'</code>';return}
+    if(Date.now()<lock){$('err').textContent='Espera unos segundos…';return}
+    if(h===CFG.passHash){sessionStorage.setItem('adm','1');render()}
+    else{if(++fails>=5){lock=Date.now()+30000;fails=0}$('err').textContent='Contraseña incorrecta';$('pw').value=''}
   };
   $('go').onclick=go;$('pw').onkeydown=e=>{if(e.key==='Enter')go()};
 }
 const setStatus=(t,ok)=>{const s=$('st');if(s){s.textContent=t;s.className='msg'+(ok?' ok':'')}};
-function expired(e){if(e.status===401||e.status===403){authed=false;csrf='';render()}else setStatus(e.message)}
 const timers={};
-function queue(d){
-  clearTimeout(timers[d]);setStatus('Guardando…',true);pending++;
-  timers[d]=setTimeout(async()=>{
-    try{const r=await api('PUT','/api/votes',{district:d,votes:data[d]});ver=r.version;setStatus('Guardado ✓',true)}
-    catch(e){expired(e)}finally{pending--}
+function queue(i){
+  clearTimeout(timers[i]);setStatus('Guardando…',true);
+  timers[i]=setTimeout(async()=>{
+    const o={};P.forEach(p=>o['p'+p.id]=v(i,p.id));
+    try{await write('votes/d'+i,o);setStatus('Guardado ✓',true)}
+    catch(e){setStatus(e.message)}
   },500);
 }
 function renderAdmin(){
-  const d=DIST[adminDist];
+  const i=adminDist;
   app.innerHTML=`<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px"><b>Panel de administración</b>
   <span><button class="d" id="rst">Reiniciar a 0</button> <button id="out">Cerrar sesión</button></span></div>
-  <div class="chips" id="dc">${DIST.map((x,i)=>`<button data-i="${i}" class="${i===adminDist?'on':''}">${x}</button>`).join('')}</div></div>
-  <div class="card"><h3 style="margin:0 0 10px">${d} — votos por partido</h3>
-  <div class="grid">${P.map(p=>`<label class="fld">${logoHTML(p)}<span class="nm">${p.name}</span><input type="number" min="0" max="10000000" step="1" data-p="${p.id}" value="${v(d,p.id)}"></label>`).join('')}</div>
-  <p style="margin:12px 0 0;color:var(--mu)"><span id="sub"></span> · <span class="msg ok" id="st">Guardado automáticamente en data.json</span></p></div>
-  <div class="card"><b>Cambiar contraseña</b><div class="pw" style="margin-top:8px">
-  <input id="cp" type="password" placeholder="Contraseña actual" autocomplete="current-password">
-  <input id="np" type="password" placeholder="Nueva (mín. 10 caracteres)" autocomplete="new-password">
-  <input id="np2" type="password" placeholder="Repetir nueva" autocomplete="new-password">
-  <button id="chg">Actualizar contraseña</button><div class="msg" id="pm"></div></div></div>`;
-  const sub=()=>$('sub').textContent='Total del distrito: '+fmt(data[d].reduce((a,b)=>a+b,0))+' votos';sub();
+  <div class="chips" id="dc">${DIST.map((x,k)=>`<button data-i="${k}" class="${k===i?'on':''}">${x}</button>`).join('')}</div></div>
+  <div class="card"><h3 style="margin:0 0 10px">${DIST[i]} — votos por partido</h3>
+  <div class="grid">${P.map(p=>`<label class="fld">${logoHTML(p)}<span class="nm">${p.name}</span><input type="number" min="0" max="10000000" step="1" data-p="${p.id}" value="${v(i,p.id)}"></label>`).join('')}</div>
+  <p style="margin:12px 0 0;color:var(--mu)"><span id="sub"></span> · <span class="msg ok" id="st">Se guarda automáticamente</span></p></div>`;
+  const sub=()=>$('sub').textContent='Total del distrito: '+fmt(P.reduce((s,p)=>s+v(i,p.id),0))+' votos';sub();
   $('dc').onclick=e=>{if(e.target.dataset.i!==undefined){adminDist=+e.target.dataset.i;renderAdmin()}};
-  app.querySelectorAll('input[data-p]').forEach(i=>i.oninput=()=>{
-    const n=Math.min(10000000,Math.max(0,parseInt(i.value,10)||0));
-    data[d]=data[d].slice();data[d][+i.dataset.p]=n;sub();queue(d)});
-  $('out').onclick=async()=>{try{await api('POST','/api/logout')}catch{}authed=false;csrf='';view='public';render()};
-  $('rst').onclick=async()=>{if(confirm('¿Reiniciar TODOS los votos a 0? Esta acción no se puede deshacer.'))try{const r=await api('POST','/api/reset');ver=r.version;await poll(true);renderAdmin()}catch(e){expired(e)}};
-  $('chg').onclick=async()=>{
-    const pm=$('pm');pm.className='msg';
-    if($('np').value!==$('np2').value){pm.textContent='Las contraseñas nuevas no coinciden';return}
-    try{await api('POST','/api/password',{current:$('cp').value,next:$('np').value});pm.className='msg ok';pm.textContent='Contraseña actualizada';['cp','np','np2'].forEach(x=>$(x).value='')}
-    catch(e){pm.textContent=e.message}
-  };
+  app.querySelectorAll('input[data-p]').forEach(inp=>inp.oninput=()=>{
+    data['d'+i]=data['d'+i]||{};data['d'+i]['p'+inp.dataset.p]=Math.min(10000000,Math.max(0,parseInt(inp.value,10)||0));sub();queue(i)});
+  $('out').onclick=()=>{logout();view='public';render()};
+  $('rst').onclick=async()=>{if(!confirm('¿Reiniciar TODOS los votos a 0? No se puede deshacer.'))return;
+    const o={};DIST.forEach((_,k)=>{o['d'+k]={};P.forEach(p=>o['d'+k]['p'+p.id]=0)});
+    try{await write('votes',o);data=o;renderAdmin()}catch(e){setStatus(e.message)}};
 }
-
-/* ---------- ACTUALIZACIÓN AUTOMÁTICA (cada 2 s desde data.json) ---------- */
-async function poll(force){
-  try{
-    const r=await fetch('/api/results',{cache:'no-store'}),j=await r.json();
-    if(!online){online=true;setLive()}
-    if((j.version!==ver||force)&&!pending){ver=j.version;data=j.votes;if(view==='public')updatePublic()}
-  }catch{if(online){online=false;setLive()}}
-}
-(async()=>{
-  try{const s=await (await fetch('/api/session',{cache:'no-store'})).json();authed=s.auth;csrf=s.csrf||''}catch{}
-  await poll(true);render();setInterval(poll,2000);
-})();
+setLive();render();stream();
 </script>
 </body>
 </html>
