@@ -51,12 +51,10 @@ input{font:inherit;padding:7px;border:1px solid var(--bd);border-radius:8px;back
 <main id="app"></main>
 <div id="tip"></div>
 <script>
-/* ====== CONFIGURA ESTO (ver pasos) ====== */
 const CFG={
-  passHash:'164f07636424589058e0bdfb1c3b3b593fdab9114e5a5660f02dcd78cc130e6d',   // hash de tu contraseña: déjalo vacío, abre la página > Admin y sigue las instrucciones
-  db:'https://resultcalca-default-rtdb.firebaseio.com'   // sin "/" al final
+  passHash:'164f07636424589058e0bdfb1c3b3b593fdab9114e5a5660f02dcd78cc130e6d',   
+  db:'https://resultcalca-default-rtdb.firebaseio.com'   
 };
-/* ======================================== */
 const DIST=['Calca (capital)','Coya','Lamay','Lares','Pisac','San Salvador','Taray','Yanatile'];
 const B='https://stovotoinformadodev.blob.core.windows.net/contenedor-2/';
 const P=[['Acción Popular',4,'#c0392b'],['Ahora Nación (AN)',2980,'#e67e22'],['Alianza Electoral Venceremos',3028,'#8e44ad'],
@@ -67,11 +65,10 @@ const P=[['Acción Popular',4,'#c0392b'],['Ahora Nación (AN)',2980,'#e67e22'],[
 let data={},view='public',filter='all',adminDist=0,online=false;
 const isAdm=()=>sessionStorage.getItem('adm')==='1';
 const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString('es-PE');
-const v=(i,p)=>((data['d'+i]||{})['p'+p])|0;                       // i = índice de distrito
-const tot=(p,f)=>f==='all'?DIST.reduce((s,_,i)=>s+v(i,p),0):v(f,p);   // f = 'all' o índice
+const v=(i,p)=>((data['d'+i]||{})['p'+p])|0;                       
+const tot=(p,f)=>f==='all'?DIST.reduce((s,_,i)=>s+v(i,p),0):v(f,p);   
 const app=$('app'),nav=$('nav'),tip=$('tip');
 
-/* ---------- Firebase por REST ---------- */
 const SALT='calca-2026';
 async function sha(pw){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(SALT+pw));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function write(path,obj){
@@ -80,7 +77,6 @@ async function write(path,obj){
 }
 function logout(){sessionStorage.removeItem('adm')}
 
-/* ---------- Tiempo real (SSE): se actualiza solo ---------- */
 function setPath(path,val,merge){
   const k=path.split('/').filter(Boolean);
   if(!k.length)data=merge?{...data,...val}:(val||{});
@@ -95,7 +91,6 @@ function stream(){
   es.onopen=()=>{online=true;setLive()};es.onerror=()=>{online=false;setLive()};
 }
 
-/* ---------- UI ---------- */
 document.addEventListener('error',e=>{const t=e.target;if(t.classList&&t.classList.contains('logo')){t.style.display='none';t.nextElementSibling.style.display='flex'}},true);
 const logoHTML=p=>`<img class="logo" src="${p.logo}" alt="" referrerpolicy="no-referrer"><div class="fb" style="background:${p.color}">${p.name.split(' ').filter(w=>w.length>2).map(w=>w[0]).join('').slice(0,3).toUpperCase()}</div>`;
 function setLive(){const l=$('live');l.className='live'+(online?'':' off');l.innerHTML=online?'<i></i>En vivo':'<i></i>Sin conexión'}
@@ -137,7 +132,6 @@ function updatePublic(){
     const best=[...P].sort((a,b)=>v(i,b.id)-v(i,a.id))[0];return `<tr><td>${d}</td><td>${fmt(dt[i])}</td><td>${dt[i]?best.name:'—'}</td></tr>`}).join('')+`<tr><th>Total</th><th>${fmt(dt.reduce((a,b)=>a+b,0))}</th><th></th></tr></table>`;
 }
 
-/* ---------- Login / Admin ---------- */
 function renderLogin(){
   const setup=!CFG.passHash;
   app.innerHTML=`<div class="card login"><h3 style="margin:0">${setup?'Crear contraseña':'Acceso administrador'}</h3>
