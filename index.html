@@ -1,180 +1,189 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src https://stovotoinformadodev.blob.core.windows.net data:; connect-src https://*.firebaseio.com https://*.firebasedatabase.app; base-uri 'none'; form-action 'none'">
-<title>Resultados Provincia de Calca</title>
+<title>JP · Analítica de votos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{--bg:#f4f5f7;--card:#fff;--tx:#1b1f27;--mu:#667085;--bd:#e3e6eb;--ac:#1d4ed8;--tr:#eef0f4}
-@media(prefers-color-scheme:dark){:root{--bg:#12151b;--card:#1b2029;--tx:#eef0f4;--mu:#9aa3b2;--bd:#2c3340;--ac:#6d93ff;--tr:#262c38}}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--tx)}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--card);border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:8px}
-h1{font-size:1.15rem;margin:0}h1 small{display:block;color:var(--mu);font-weight:400;font-size:.8rem}
-main{max-width:1000px;margin:0 auto;padding:18px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px}
-button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 13px;border-radius:8px}
-button.p{background:var(--ac);color:#fff;border-color:var(--ac)}button.d{color:#dc2626;border-color:#dc2626}
-.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
-.stat{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px}
-.stat span{color:var(--mu);font-size:.78rem}.stat b{display:block;font-size:1.4rem;margin-top:2px}
-.bars{display:flex;flex-direction:column}.row{display:flex;align-items:center;gap:10px;padding:6px 0}
-.logo{width:42px;height:42px;border-radius:8px;object-fit:contain;background:#fff;border:1px solid var(--bd);flex:none}
-.fb{width:42px;height:42px;border-radius:8px;flex:none;display:none;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem}
-.nm{width:150px;font-size:.82rem;flex:none;line-height:1.15}
-.tr{flex:1;background:var(--tr);border-radius:8px;height:30px;overflow:hidden}
-.fill{height:100%;width:0;border-radius:8px;transition:width .7s cubic-bezier(.2,.8,.2,1);cursor:pointer}
-.row:hover .fill{filter:brightness(1.12)}
-.vl{width:96px;text-align:right;font-variant-numeric:tabular-nums;font-size:.85rem;flex:none}
-.vl b{display:block}.vl span{color:var(--mu);font-size:.75rem}
-#tip{position:fixed;pointer-events:none;background:#111;color:#fff;padding:8px 10px;border-radius:8px;font-size:.78rem;display:none;z-index:9;max-width:230px}
-#tip b{display:block;margin-bottom:3px}
-table{width:100%;border-collapse:collapse;font-size:.85rem}th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--bd)}th:first-child,td:first-child{text-align:left}
-.live{font-size:.75rem;color:var(--mu)}.live i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#16a34a;margin-right:5px;animation:pl 1.5s infinite}
-.live.off i{background:#dc2626;animation:none}@keyframes pl{50%{opacity:.3}}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.fld{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:10px;padding:8px}.fld .nm{width:auto;flex:1}
-input{font:inherit;padding:7px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
-.fld input{width:100px;text-align:right}
-.login{max-width:320px;margin:50px auto;display:flex;flex-direction:column;gap:10px}.login input,.pw input{width:100%}
-.pw{display:grid;gap:8px;max-width:340px}
-.msg{font-size:.85rem;min-height:1.1em;color:#dc2626}.msg.ok{color:#16a34a}
-@media(max-width:600px){.nm{width:90px;font-size:.72rem}.vl{width:70px}.logo,.fb{width:32px;height:32px}}
+:root{--jp:#0b7a3e;--jp2:#0a5c2f;--ink:#16202a;--mut:#64707d;--line:#dde2e8;--bg:#eef1f4;--red:#c8102e}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Segoe UI,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--jp2);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:5px solid var(--red)}
+header b{font-size:24px;background:#fff;color:var(--jp2);padding:2px 12px;border-radius:6px}
+header h1{font-size:18px;margin:0;font-weight:600}
+#upd{margin-left:auto;font-size:13px}
+main{max-width:1200px;margin:0 auto;padding:18px}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:2px solid var(--line);background:#fff;color:var(--ink);padding:10px 18px;border-radius:6px;font-weight:600}
+button.on{background:var(--jp);border-color:var(--jp);color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px}
+.kpi.m{background:var(--jp);color:#fff;border:0}
+.kpi span{font-size:13px;color:var(--mut)}.kpi.m span{color:#cfe9d9}
+.kpi b{display:block;font-size:30px;line-height:1.2}
+.kpi em{font-style:normal;font-size:13px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px}
+.card.w{grid-column:1/-1}
+h2{font-size:16px;margin:0 0 4px}.sub{font-size:13px;color:var(--mut);margin:0 0 10px}
+.box{position:relative;height:300px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+.pos{color:var(--jp);font-weight:700}.neg{color:var(--red);font-weight:700}
+.ov{overflow-x:auto}
+@media(max-width:480px){.charts{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
-  <h1>Resultados – Provincia de Calca<small>Alcalde y regidores provinciales</small></h1>
-  <div><span class="live" id="live"></span> <button id="nav" class="p"></button></div>
+  <b>JP</b><h1>Analítica de votos por mesa</h1>
+  <span id="upd">Conectando…</span>
 </header>
-<main id="app"></main>
-<div id="tip"></div>
+<main>
+  <div class="tabs">
+    <button class="on" data-t="provincial">Voto provincial</button>
+    <button data-t="distrital">Voto distrital</button>
+    <button id="demo" style="margin-left:auto">Datos de prueba</button>
+  </div>
+  <div class="kpis">
+    <div class="kpi m"><span>Votos JP</span><b id="k1">0</b><em id="k1b"></em></div>
+    <div class="kpi"><span>% votos válidos</span><b id="k2">0%</b><em id="k2b"></em></div>
+    <div class="kpi"><span>Posición</span><b id="k3">—</b><em id="k3b"></em></div>
+    <div class="kpi"><span>Mesas reportadas</span><b id="k4">—</b><em id="k4b"></em></div>
+    <div class="kpi"><span>Proyección JP final</span><b id="k5">—</b><em id="k5b"></em></div>
+  </div>
+  <div class="charts">
+    <div class="card w"><h2>Resultados por partido</h2><p class="sub">Votos acumulados de todas las mesas reportadas</p><div class="box"><canvas id="c1"></canvas></div></div>
+    <div class="card"><h2>JP vs. el mejor rival, por distrito</h2><p class="sub">Rival = partido con más votos en ese distrito</p><div class="box"><canvas id="c2"></canvas></div></div>
+    <div class="card"><h2>Diferencia de votos (JP − mejor rival)</h2><p class="sub">Verde: JP lidera · Rojo: JP va detrás</p><div class="box"><canvas id="c3"></canvas></div></div>
+    <div class="card"><h2>Proyección final por partido</h2><p class="sub">Estimada según el promedio por mesa reportada en cada distrito</p><div class="box"><canvas id="c4"></canvas></div></div>
+    <div class="card"><h2>Avance de mesas por distrito (%)</h2><p class="sub">Mesas con al menos un voto registrado</p><div class="box"><canvas id="c5"></canvas></div></div>
+    <div class="card w"><h2>Detalle por distrito</h2><div class="ov"><table id="tb"></table></div></div>
+    <div class="card w"><h2>Locales donde JP saca más votos</h2><div class="ov"><table id="tl"></table></div></div>
+  </div>
+</main>
 <script>
-const CFG={
-  passHash:'164f07636424589058e0bdfb1c3b3b593fdab9114e5a5660f02dcd78cc130e6d',   
-  db:'https://resultcalca-default-rtdb.firebaseio.com'   
-};
-const DIST=['Calca (capital)','Coya','Lamay','Lares','Pisac','San Salvador','Taray','Yanatile'];
-const B='https://stovotoinformadodev.blob.core.windows.net/contenedor-2/';
-const P=[['Acción Popular',4,'#c0392b'],['Ahora Nación (AN)',2980,'#e67e22'],['Alianza Electoral Venceremos',3028,'#8e44ad'],
- ['Juntos por el Perú',1264,'#16a085'],['Partido Cívico Obras',2941,'#2980b9'],['Partido del Buen Gobierno',2961,'#27ae60'],
- ['Partido Demócrata Verde',2895,'#2ecc71'],['Perú Primero',2925,'#d35400'],['PRIN',2921,'#34495e'],['Progresemos',2967,'#f39c12']
-].map((p,i)=>({id:i,name:p[0],logo:B+p[1]+'.png',color:p[2]}));
+/* ===== CONFIGURA AQUÍ ===== */
+const API = 'https://script.google.com/macros/s/AKfycby5CnAqzBZ1ibZ8A5B_n4MUjSOMrsRHiph5N9-9olFdkCcX0NY_CScOvqOaq8XEYssU/exec';
+const ECHO = 'https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnTr5htX5BsoV4u4Bf6KVy5DIHPnGuh6r0IVPf-yFY3UV8dPsviicZA5DXisWJc98fRLNkQOCXX5T6uxq7zFDLYCutcTMvyyfhHPcqM7yYE6vcOz4mAglSIYI_Nqf1tOgRpPO-NHCTQF1K2EJJT5Xj-WQsYayiTm2aBBxKb5f14uFfkb040CdpMqmfO82uM0qD2OFRYdVO0iBALMCVjPMsOelqXeO3UKaICAwn4ddWn-35hfyfhXRs492QzbzKZFzjsH2GrTxuRPl7VbAaEXi3mEiedKNw&lib=MtU3Iwae8ePsYtTmIvSS8jRI1Gs6Nkp1M'; // respaldo (voto provincial)
+const REFRESH_MS = 15000;
+/* ========================== */
+const P=[['JP','#0b7a3e'],['Acción Popular','#e11d48'],['Ahora Nación','#2563eb'],['Venceremos','#f59e0b'],['Partido Cívico','#7c3aed'],['Buen Gobierno','#0891b2'],['Demócrata Verde','#65a30d'],['Perú Primero','#db2777'],['PRIN','#ea580c'],['Progresemos','#4f46e5'],['Blanco','#94a3b8'],['Viciado','#475569']];
+const NV=10; // partidos válidos (los 10 primeros)
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n||0).toLocaleString('es-PE');
+const pct=(a,b)=>b?(a/b*100).toFixed(1)+'%':'0%';
+let TIPO='provincial',FILAS=[],DEMO=false,ch={};
 
-let data={},view='public',filter='all',adminDist=0,online=false;
-const isAdm=()=>sessionStorage.getItem('adm')==='1';
-const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString('es-PE');
-const v=(i,p)=>((data['d'+i]||{})['p'+p])|0;                       
-const tot=(p,f)=>f==='all'?DIST.reduce((s,_,i)=>s+v(i,p),0):v(f,p);   
-const app=$('app'),nav=$('nav'),tip=$('tip');
+function mk(id,cfg){ if(ch[id]){ch[id].destroy();} ch[id]=new Chart($(id),cfg); }
+const base={responsive:true,maintainAspectRatio:false,animation:{duration:400}};
 
-const SALT='calca-2026';
-async function sha(pw){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(SALT+pw));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function write(path,obj){
-  const r=await fetch(`${CFG.db}/${path}.json`,{method:'PUT',body:JSON.stringify(obj)});
-  if(!r.ok)throw new Error('No se pudo guardar (revisa las reglas de la base de datos)');
-}
-function logout(){sessionStorage.removeItem('adm')}
-
-function setPath(path,val,merge){
-  const k=path.split('/').filter(Boolean);
-  if(!k.length)data=merge?{...data,...val}:(val||{});
-  else{let o=data;for(let i=0;i<k.length-1;i++)o=o[k[i]]=(o[k[i]]&&typeof o[k[i]]==='object')?o[k[i]]:{};
-    const last=k[k.length-1];if(merge)o[last]={...o[last],...val};else if(val===null)delete o[last];else o[last]=val}
-  if(view==='public')updatePublic();
-}
-function stream(){
-  const es=new EventSource(CFG.db+'/votes.json');
-  es.addEventListener('put',e=>{const m=JSON.parse(e.data);setPath(m.path,m.data,false)});
-  es.addEventListener('patch',e=>{const m=JSON.parse(e.data);setPath(m.path,m.data,true)});
-  es.onopen=()=>{online=true;setLive()};es.onerror=()=>{online=false;setLive()};
-}
-
-document.addEventListener('error',e=>{const t=e.target;if(t.classList&&t.classList.contains('logo')){t.style.display='none';t.nextElementSibling.style.display='flex'}},true);
-const logoHTML=p=>`<img class="logo" src="${p.logo}" alt="" referrerpolicy="no-referrer"><div class="fb" style="background:${p.color}">${p.name.split(' ').filter(w=>w.length>2).map(w=>w[0]).join('').slice(0,3).toUpperCase()}</div>`;
-function setLive(){const l=$('live');l.className='live'+(online?'':' off');l.innerHTML=online?'<i></i>En vivo':'<i></i>Sin conexión'}
-function render(){
-  nav.textContent=view==='public'?'Admin':'← Ver resultados';
-  if(view==='public')renderPublic();else if(!isAdm())renderLogin();else renderAdmin();
-  setLive();
-}
-nav.onclick=()=>{view=view==='public'?'admin':'public';render()};
-
-function renderPublic(){
-  app.innerHTML=`<div class="card"><div class="chips" id="chips">${['all',...DIST].map((d,i)=>`<button data-d="${i===0?'all':i-1}">${i===0?'General (suma)':d}</button>`).join('')}</div></div>
-  <div class="stats" id="stats"></div>
-  <div class="card"><h3 style="margin:0 0 10px" id="ttl"></h3><div class="bars">${P.map(p=>`<div class="row" data-id="${p.id}">${logoHTML(p)}<div class="nm">${p.name}</div><div class="tr"><div class="fill" style="background:${p.color}"></div></div><div class="vl"><b>0</b><span>0%</span></div></div>`).join('')}</div></div>
-  <div class="card" id="tbl" style="overflow-x:auto"></div>`;
-  $('chips').onclick=e=>{const d=e.target.dataset.d;if(d!==undefined){filter=d==='all'?'all':+d;updatePublic()}};
-  app.querySelectorAll('.row').forEach(r=>{r.onmousemove=e=>showTip(e,+r.dataset.id);r.onmouseleave=()=>tip.style.display='none'});
-  updatePublic();
-}
-function showTip(e,id){
-  let h=`<b>${P[id].name}</b>${fmt(tot(id,filter))} votos`;
-  if(filter==='all')h+='<br>'+DIST.map((d,i)=>`${d}: ${fmt(v(i,id))}`).join('<br>');
-  tip.innerHTML=h;tip.style.display='block';tip.style.left=Math.min(e.clientX+14,innerWidth-240)+'px';tip.style.top=(e.clientY+14)+'px';
-}
-function updatePublic(){
-  if(!$('chips'))return;
-  document.querySelectorAll('#chips button').forEach(b=>b.classList.toggle('on',b.dataset.d===String(filter)));
-  const t=P.map(p=>tot(p.id,filter)),sum=t.reduce((a,b)=>a+b,0),max=Math.max(...t,1);
-  const order=P.map(p=>p.id).sort((a,b)=>t[b]-t[a]),name=filter==='all'?'Provincia de Calca':DIST[filter];
-  app.querySelectorAll('.row').forEach(r=>{
-    const id=+r.dataset.id;r.style.order=order.indexOf(id);
-    r.querySelector('.fill').style.width=(t[id]/max*100)+'%';
-    r.querySelector('.vl').innerHTML=`<b>${fmt(t[id])}</b><span>${sum?(t[id]/sum*100).toFixed(1):'0.0'}%</span>`;
+function analizar(F){
+  const D={},L={};
+  F.forEach(r=>{
+    const d=D[r.distrito]??={v:Array(12).fill(0),mesas:0,rep:0};
+    const rep=r.votos.some(x=>x>0);
+    r.votos.forEach((x,i)=>d.v[i]+=x);
+    d.mesas++; if(rep)d.rep++;
+    const k=r.distrito+'|'+r.local; const l=L[k]??={d:r.distrito,n:r.local,jp:0,t:0};
+    l.jp+=r.votos[0]; l.t+=r.votos.slice(0,NV).reduce((a,b)=>a+b,0);
   });
-  $('ttl').textContent=filter==='all'?'Total provincial (suma de 8 distritos)':name;
-  $('stats').innerHTML=`<div class="stat"><span>Votos totales</span><b>${fmt(sum)}</b></div><div class="stat"><span>Partido líder</span><b style="font-size:1rem;margin-top:6px">${sum?P[order[0]].name:'—'}</b></div><div class="stat"><span>Ámbito</span><b style="font-size:1rem;margin-top:6px">${name}</b></div>`;
-  const dt=DIST.map((_,i)=>P.reduce((s,p)=>s+v(i,p.id),0));
-  $('tbl').innerHTML=`<table><tr><th>Distrito</th><th>Votos</th><th>Primer lugar</th></tr>`+DIST.map((d,i)=>{
-    const best=[...P].sort((a,b)=>v(i,b.id)-v(i,a.id))[0];return `<tr><td>${d}</td><td>${fmt(dt[i])}</td><td>${dt[i]?best.name:'—'}</td></tr>`}).join('')+`<tr><th>Total</th><th>${fmt(dt.reduce((a,b)=>a+b,0))}</th><th></th></tr></table>`;
+  return {D,L};
+}
+const rival=v=>{let b=1;for(let i=2;i<NV;i++)if(v[i]>v[b])b=i;return b;};
+
+function render(){
+  const {D,L}=analizar(FILAS), ds=Object.keys(D).sort();
+  const T=Array(12).fill(0); ds.forEach(d=>D[d].v.forEach((x,i)=>T[i]+=x));
+  const valid=T.slice(0,NV).reduce((a,b)=>a+b,0);
+  const rank=[...Array(NV).keys()].sort((a,b)=>T[b]-T[a]);
+  const pos=rank.indexOf(0)+1, lead=rank[0]===0?rank[1]:rank[0], diff=T[0]-T[lead];
+  const rep=ds.reduce((a,d)=>a+D[d].rep,0), tot=FILAS.length;
+
+  // Proyección: promedio por mesa reportada × total de mesas, por distrito
+  const PR=Array(12).fill(0);
+  ds.forEach(d=>{const x=D[d]; if(x.rep) x.v.forEach((v,i)=>PR[i]+=v/x.rep*x.mesas);});
+  const pv=PR.slice(0,NV).reduce((a,b)=>a+b,0);
+  const prank=[...Array(NV).keys()].sort((a,b)=>PR[b]-PR[a]);
+  const plead=prank[0]===0?prank[1]:prank[0], pdiff=PR[0]-PR[plead];
+
+  $('k1').textContent=fmt(T[0]); $('k1b').textContent=fmt(valid)+' votos válidos contados';
+  $('k2').textContent=pct(T[0],valid); $('k2b').textContent='sobre votos válidos';
+  $('k3').textContent=valid?pos+'.º lugar':'—';
+  $('k3b').textContent=valid?(pos===1?'Ventaja de '+fmt(diff)+' sobre '+P[lead][0]:'A '+fmt(-diff)+' votos de '+P[lead][0]):'Sin datos aún';
+  $('k4').textContent=tot?rep+' / '+tot:'—'; $('k4b').textContent=tot?pct(rep,tot)+' de avance':'';
+  $('k5').textContent=rep?pct(PR[0],pv):'—';
+  $('k5b').textContent=rep?(pdiff>=0?'Ganaría por ~'+fmt(Math.round(pdiff))+' votos':'Perdería por ~'+fmt(Math.round(-pdiff))+' votos')+' vs. '+P[plead][0]:'Sin datos para proyectar';
+
+  // 1. Resultados por partido (barras horizontales, JP resaltado)
+  const o=[...Array(12).keys()].sort((a,b)=>T[b]-T[a]);
+  mk('c1',{type:'bar',data:{labels:o.map(i=>P[i][0]),datasets:[{data:o.map(i=>T[i]),backgroundColor:o.map(i=>P[i][1]),borderRadius:4}]},
+    options:{...base,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)+' votos ('+pct(c.raw,valid)+')'}}}}});
+
+  // 2. JP vs mejor rival por distrito
+  const rv=ds.map(d=>rival(D[d].v));
+  mk('c2',{type:'bar',data:{labels:ds,datasets:[
+    {label:'JP',data:ds.map(d=>D[d].v[0]),backgroundColor:'#0b7a3e',borderRadius:3},
+    {label:'Mejor rival',data:ds.map((d,k)=>D[d].v[rv[k]]),backgroundColor:'#c8102e',borderRadius:3}]},
+    options:{...base,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{afterLabel:c=>c.datasetIndex?P[rv[c.dataIndex]][0]:''}}}}});
+
+  // 3. Diferencia JP − mejor rival
+  const df=ds.map((d,k)=>D[d].v[0]-D[d].v[rv[k]]);
+  mk('c3',{type:'bar',data:{labels:ds,datasets:[{data:df,backgroundColor:df.map(x=>x>=0?'#0b7a3e':'#c8102e'),borderRadius:3}]},
+    options:{...base,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>(c.raw>=0?'+':'')+fmt(c.raw)+' vs. '+P[rv[c.dataIndex]][0]}}}}});
+
+  // 4. Proyección por partido
+  const po=[...Array(NV).keys()].sort((a,b)=>PR[b]-PR[a]);
+  mk('c4',{type:'bar',data:{labels:po.map(i=>P[i][0]),datasets:[{data:po.map(i=>Math.round(PR[i])),backgroundColor:po.map(i=>P[i][1]),borderRadius:4}]},
+    options:{...base,indexAxis:'y',plugins:{legend:{display:false}}}});
+
+  // 5. Avance
+  mk('c5',{type:'bar',data:{labels:ds,datasets:[{data:ds.map(d=>+(D[d].rep/D[d].mesas*100).toFixed(1)),backgroundColor:'#0a5c2f',borderRadius:3}]},
+    options:{...base,scales:{y:{beginAtZero:true,max:100}},plugins:{legend:{display:false}}}});
+
+  // Tabla por distrito
+  $('tb').innerHTML='<thead><tr><th>Distrito</th><th>Va ganando</th><th>JP</th><th>% JP</th><th>Diferencia JP</th><th>Avance</th></tr></thead><tbody>'+
+    ds.map((d,k)=>{const x=D[d],vt=x.v.slice(0,NV).reduce((a,b)=>a+b,0);
+      const w=x.v.slice(0,NV).indexOf(Math.max(...x.v.slice(0,NV)));
+      return `<tr><td>${d}</td><td>${vt?P[w][0]:'—'}</td><td>${fmt(x.v[0])}</td><td>${pct(x.v[0],vt)}</td>
+      <td class="${df[k]>=0?'pos':'neg'}">${vt?(df[k]>=0?'+':'')+fmt(df[k]):'—'}</td><td>${x.rep}/${x.mesas}</td></tr>`}).join('')+'</tbody>';
+
+  // Top locales JP
+  const top=Object.values(L).filter(l=>l.jp>0).sort((a,b)=>b.jp-a.jp).slice(0,10);
+  $('tl').innerHTML=top.length?'<thead><tr><th>Local</th><th>Distrito</th><th>Votos JP</th><th>% del local</th></tr></thead><tbody>'+
+    top.map(l=>`<tr><td>${l.n}</td><td>${l.d}</td><td>${fmt(l.jp)}</td><td>${pct(l.jp,l.t)}</td></tr>`).join('')+'</tbody>'
+    :'<tbody><tr><td>Aún no hay votos registrados para JP.</td></tr></tbody>';
 }
 
-function renderLogin(){
-  const setup=!CFG.passHash;
-  app.innerHTML=`<div class="card login"><h3 style="margin:0">${setup?'Crear contraseña':'Acceso administrador'}</h3>
-  <input id="pw" type="password" placeholder="Contraseña" autocomplete="current-password">
-  <div class="msg" id="err"></div><button class="p" id="go">${setup?'Generar hash':'Ingresar'}</button></div>`;
-  let fails=0,lock=0;
-  const go=async()=>{
-    const h=await sha($('pw').value);
-    if(setup){$('err').className='msg ok';$('err').innerHTML='Copia este valor en <b>passHash</b> dentro de index.html:<br><code style="word-break:break-all">'+h+'</code>';return}
-    if(Date.now()<lock){$('err').textContent='Espera unos segundos…';return}
-    if(h===CFG.passHash){sessionStorage.setItem('adm','1');render()}
-    else{if(++fails>=5){lock=Date.now()+30000;fails=0}$('err').textContent='Contraseña incorrecta';$('pw').value=''}
-  };
-  $('go').onclick=go;$('pw').onkeydown=e=>{if(e.key==='Enter')go()};
+function demo(){ // datos aleatorios para probar el diseño
+  FILAS=FILAS.map((r,n)=>{const rep=Math.random()<.7;
+    return {...r,votos:r.votos.map((_,i)=>rep?Math.floor(Math.random()*(i===0?60:45)):0)};});
 }
-const setStatus=(t,ok)=>{const s=$('st');if(s){s.textContent=t;s.className='msg'+(ok?' ok':'')}};
-const timers={};
-function queue(i){
-  clearTimeout(timers[i]);setStatus('Guardando…',true);
-  timers[i]=setTimeout(async()=>{
-    const o={};P.forEach(p=>o['p'+p.id]=v(i,p.id));
-    try{await write('votes/d'+i,o);setStatus('Guardado ✓',true)}
-    catch(e){setStatus(e.message)}
-  },500);
+
+async function cargar(){
+  if(DEMO)return;
+  const t=TIPO;
+  const urls=[API+'?tipo='+t+'&t='+Date.now()]; if(t==='provincial')urls.push(ECHO);
+  for(const u of urls){
+    try{
+      const j=await (await fetch(u)).json();
+      if(t!==TIPO)return;
+      if(j.status==='error')continue;
+      FILAS=j.filas||[]; render();
+      $('upd').textContent='En vivo · '+new Date().toLocaleTimeString('es-PE'); return;
+    }catch(e){}
+  }
+  $('upd').textContent='Sin conexión, reintentando…';
 }
-function renderAdmin(){
-  const i=adminDist;
-  app.innerHTML=`<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px"><b>Panel de administración</b>
-  <span><button class="d" id="rst">Reiniciar a 0</button> <button id="out">Cerrar sesión</button></span></div>
-  <div class="chips" id="dc">${DIST.map((x,k)=>`<button data-i="${k}" class="${k===i?'on':''}">${x}</button>`).join('')}</div></div>
-  <div class="card"><h3 style="margin:0 0 10px">${DIST[i]} — votos por partido</h3>
-  <div class="grid">${P.map(p=>`<label class="fld">${logoHTML(p)}<span class="nm">${p.name}</span><input type="number" min="0" max="10000000" step="1" data-p="${p.id}" value="${v(i,p.id)}"></label>`).join('')}</div>
-  <p style="margin:12px 0 0;color:var(--mu)"><span id="sub"></span> · <span class="msg ok" id="st">Se guarda automáticamente</span></p></div>`;
-  const sub=()=>$('sub').textContent='Total del distrito: '+fmt(P.reduce((s,p)=>s+v(i,p.id),0))+' votos';sub();
-  $('dc').onclick=e=>{if(e.target.dataset.i!==undefined){adminDist=+e.target.dataset.i;renderAdmin()}};
-  app.querySelectorAll('input[data-p]').forEach(inp=>inp.oninput=()=>{
-    data['d'+i]=data['d'+i]||{};data['d'+i]['p'+inp.dataset.p]=Math.min(10000000,Math.max(0,parseInt(inp.value,10)||0));sub();queue(i)});
-  $('out').onclick=()=>{logout();view='public';render()};
-  $('rst').onclick=async()=>{if(!confirm('¿Reiniciar TODOS los votos a 0? No se puede deshacer.'))return;
-    const o={};DIST.forEach((_,k)=>{o['d'+k]={};P.forEach(p=>o['d'+k]['p'+p.id]=0)});
-    try{await write('votes',o);data=o;renderAdmin()}catch(e){setStatus(e.message)}};
-}
-setLive();render();stream();
+document.querySelectorAll('.tabs [data-t]').forEach(b=>b.onclick=()=>{
+  TIPO=b.dataset.t; DEMO=false; FILAS=[];
+  document.querySelectorAll('.tabs [data-t]').forEach(x=>x.classList.toggle('on',x===b));
+  $('upd').textContent='Cargando…'; render(); cargar();
+});
+$('demo').onclick=()=>{ if(!FILAS.length)return alert('Primero deben cargar las mesas desde el servidor.'); DEMO=true; demo(); render(); $('upd').textContent='Modo prueba (datos aleatorios)'; };
+render(); cargar(); setInterval(cargar,REFRESH_MS);
 </script>
 </body>
 </html>
